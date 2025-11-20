@@ -1,0 +1,8 @@
+language: de
+intents:
+  HassStartTimer:
+    data:
+      - sentences:
+          - "<timer_duration>[ für[ (<artikel_bestimmt>|<possessivpronom_mein>|<possessivpronom_unser>)]][ {timer_name:name}[[-]timer]]"
+          - "[für[ (<artikel_bestimmt>|<possessivpronom_mein>|<possessivpronom_unser>)] ][{timer_name:name} ]<timer_duration>"
+          - "[{timer_name:name}[[-]timer] [für ]]<timer_duration>"

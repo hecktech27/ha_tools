@@ -1,0 +1,12 @@
+language: de
+intents:
+  HassGetState:
+    data:
+      - sentences:
+          - "wann geht[ heute] die Sonne unter"
+          - "wann wird[ e]s[ heute][ drau(ss|ß)en] dunkel"
+        response: sun_dusk
+      - sentences:
+          - "wann geht[ (heute|morgen)] die Sonne auf"
+          - wann wird[ e]s[ (heute|morgen)] hell
+        response: sun_dawn

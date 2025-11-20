@@ -1,0 +1,67 @@
+language: "de"
+responses:
+  intents:
+    HassGetState:
+      sun_dusk: |
+        {% set dusk = state_attr('sun.sun', 'next_dusk') %}
+        {% if dusk %}
+          {% set diff = as_timestamp(dusk) - as_timestamp(now()) %}
+          {% set diff_abs = diff | abs %}
+          {% set hours = (diff_abs // 3600) | int %}
+          {% set minutes = ((diff_abs % 3600) // 60) | int %}
+
+          {% set event_date = dusk[:10] %}
+          {% set today = now().strftime('%Y-%m-%d') %}
+
+          {% if diff > 0 %}
+            {% if event_date == today %}
+              {% set parts = [] %}
+              {% if hours > 0 %}
+                {% set parts = parts + [hours ~ ' Stunde' ~ ('n' if hours != 1 else '')] %}
+              {% endif %}
+              {% if minutes > 0 %}
+                {% set parts = parts + [minutes ~ ' Minute' ~ ('n' if minutes != 1 else '')] %}
+              {% endif %}
+              In {{ parts | join(' und ') }}
+            {% else %}
+              {% set time_parts = dusk.split('T')[1].split(':') %}
+              Morgen um {{ time_parts[0]|int }}:{% if time_parts[1]|int > 0 %}{{ '%02d'|format(time_parts[1]|int) }}{% else %}00{% endif %} Uhr
+            {% endif %}
+          {% else %}
+            Die Sonne ist bereits untergegangen.
+          {% endif %}
+        {% else %}
+          Keine Informationen verfügbar.
+        {% endif %}
+
+      sun_dawn: |
+        {% set dawn = state_attr('sun.sun', 'next_dawn') %}
+        {% if dawn %}
+          {% set diff = as_timestamp(dawn) - as_timestamp(now()) %}
+          {% set diff_abs = diff | abs %}
+          {% set hours = (diff_abs // 3600) | int %}
+          {% set minutes = ((diff_abs % 3600) // 60) | int %}
+
+          {% set event_date = dawn[:10] %}
+          {% set today = now().strftime('%Y-%m-%d') %}
+
+          {% if diff > 0 %}
+            {% if event_date == today %}
+              {% set parts = [] %}
+              {% if hours > 0 %}
+                {% set parts = parts + [hours ~ ' Stunde' ~ ('n' if hours != 1 else '')] %}
+              {% endif %}
+              {% if minutes > 0 %}
+                {% set parts = parts + [minutes ~ ' Minute' ~ ('n' if minutes != 1 else '')] %}
+              {% endif %}
+              In {{ parts | join(' und ') }}
+            {% else %}
+              {% set time_parts = dawn.split('T')[1].split(':') %}
+              Morgen um {{ time_parts[0]|int }}:{% if time_parts[1]|int > 0 %}{{ '%02d'|format(time_parts[1]|int) }}{% else %}00{% endif %} Uhr
+            {% endif %}
+          {% else %}
+            Die Sonne ist bereits aufgegangen.
+          {% endif %}
+        {% else %}
+          Keine Informationen verfügbar.
+        {% endif %}

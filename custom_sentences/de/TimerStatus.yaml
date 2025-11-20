@@ -1,0 +1,8 @@
+language: de
+intents:
+  HassTimerStatus:
+    data:
+      - sentences:
+          - "Wie lange"
+          - "Restzeit"
+          - "wann (ist|sind) [(der|die|das|mein|meine|unser|unsere) ]{timer_name:name} fertig"
