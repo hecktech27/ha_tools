@@ -3,10 +3,10 @@ intents:
   HassGetState:
     data:
       - sentences:
-          - "wann geht[ heute] die Sonne unter"
-          - "wann wird[ e]s[ heute][ drau(ss|ß)en] dunkel"
+          - "wann geht[ heute] die Sonne [wieder ]unter"
+          - "wann wird[ e]s[ heute][ drau(ss|ß)en][ wieder] dunkel"
         response: sun_dusk
       - sentences:
-          - "wann geht[ (heute|morgen)] die Sonne auf"
-          - wann wird[ e]s[ (heute|morgen)] hell
+          - "wann geht[ (heute|morgen)] die Sonne[ wieder] auf"
+          - wann wird[ e]s[ (heute|morgen)][ drau(ss|ß)en][ wieder] hell
         response: sun_dawn
