@@ -4,4 +4,4 @@ intents:
     data:
       - sentences:
           - "Restzeit"
-          - "wann (ist|sind) [(der|die|das|mein|meine|unser|unsere) ]{timer_name:name} fertig"
+          - "wann (ist|sind) [(unser|unsere) ]{timer_name:name} fertig"
