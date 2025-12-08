@@ -48,10 +48,12 @@ blueprint:
           unit_of_measurement: lux
     override_switch:
       name: Override Switch to disable motion light
+      default: none
       selector:
         entity:
           filter:
             - domain: input_boolean
+            - domain: 
 
 
 # If motion is detected within the delay,
