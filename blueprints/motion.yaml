@@ -59,13 +59,20 @@ triggers:
   from: "off"
   to: "on"
 
+variables:
+  ambient_sensor: !input ambient_light_sensor
+
 condition:
   - condition: or
     conditions:
+      # Either no sensor defined
       - condition: template
-        value_template: "{{ (not is_state('!input ambient_light_sensor', 'unknown')) and (states(!input ambient_light_sensor) | int < ( !input ambient_light_threshold | int )) }}"
+        value_template: "{{ ambient_sensor == 'none' }}"
+      # Or sensor value below threshold
       - condition: template
-        value_template: "{{ !input ambient_light_sensor == 'none' }}"
+        value_template: >
+          {% set lux = states(ambient_sensor) | float(99999) %}
+          {{ lux < ambient_threshold }}
 
 actions:
   - alias: "Turn on the light"
