@@ -59,6 +59,14 @@ triggers:
   from: "off"
   to: "on"
 
+condition:
+  - condition: or
+    conditions:
+      - condition: template
+        value_template: "{{ (not is_state('!input ambient_light_sensor', 'unknown')) and (states(!input ambient_light_sensor) | int < ( !input ambient_light_threshold | int )) }}"
+      - condition: template
+        value_template: "{{ !input ambient_light_sensor == 'none' }}"
+
 actions:
   - alias: "Turn on the light"
     action: light.turn_on
