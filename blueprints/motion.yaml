@@ -15,7 +15,8 @@ blueprint:
             - device_class: motion
               domain: binary_sensor
     light_target:
-      name: Light
+      name: "Light(s)"
+      description: "selected lights will be turned on and off by the motion sensor."
       selector:
         target:
           entity:
@@ -30,7 +31,7 @@ blueprint:
           max: 3600
           unit_of_measurement: seconds
     ambient_light_sensor:
-      name: Ambient Light Sensor (optional)
+      name: Ambient Light Sensor - optional
       description: Sensor measuring ambient light (lux). If empty, light always triggers on motion.
       default: none
       selector:
@@ -38,7 +39,7 @@ blueprint:
           domain: sensor
           device_class: illuminance
     ambient_light_threshold:
-      name: Light threshold (lux)
+      name: Light threshold (lux) - optional
       description: Lights only turn on if sensor value is below this threshold.
       default: 100
       selector:
@@ -48,13 +49,13 @@ blueprint:
           unit_of_measurement: lux
     override_switch:
       name: Override Switch to disable motion light
+      description: When turned on the automation will not trigger
       default: none
       selector:
         entity:
           filter:
             - domain: input_boolean
-            - domain: 
-
+            - domain: switch
 
 # If motion is detected within the delay,
 # we restart the script.
