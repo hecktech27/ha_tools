@@ -68,13 +68,18 @@ triggers:
 variables:
   ambient_sensor: !input ambient_light_sensor
   ambient_threshold: !input ambient_light_threshold
+  override: !input override_switch
   
 condition:
   - condition: and
     conditions:
-    - condition: state
-      entity_id: !override_switch
-      state: off
+    - condition: or
+      conditions:
+      - condition: template
+        value_template: "{{ override == 'none' }}"      
+      - condition: state
+        entity_id: !override_switch
+        state: off
     - condition: or
       conditions:
         # Either no sensor defined
