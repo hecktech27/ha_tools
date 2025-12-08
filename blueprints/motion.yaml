@@ -81,7 +81,7 @@ condition:
         value_template: "{{ override == 'none' }}"      
       - condition: state
         entity_id: !input override_switch
-        state: off
+        state: "off"
     - condition: or
       conditions:
         # Either no sensor defined
