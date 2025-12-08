@@ -48,7 +48,7 @@ blueprint:
           max: 10000
           unit_of_measurement: lux
     override_switch:
-      name: Override Switch to disable motion light
+      name: Override Switch to disable motion light - optional
       description: When turned on the automation will not trigger
       default: none
       selector:
