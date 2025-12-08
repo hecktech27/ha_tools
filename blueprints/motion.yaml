@@ -70,16 +70,21 @@ variables:
   ambient_threshold: !input ambient_light_threshold
   
 condition:
-  - condition: or
+  - condition: and
     conditions:
-      # Either no sensor defined
-      - condition: template
-        value_template: "{{ ambient_sensor == 'none' }}"
-      # Or sensor value below threshold
-      - condition: template
-        value_template: >
-          {% set lux = states(ambient_sensor) | float(99999) %}
-          {{ lux < ambient_threshold }}
+    - condition: state
+      entity_id: !override_switch
+      state: off
+    - condition: or
+      conditions:
+        # Either no sensor defined
+        - condition: template
+          value_template: "{{ ambient_sensor == 'none' }}"
+        # Or sensor value below threshold
+        - condition: template
+          value_template: >
+            {% set lux = states(ambient_sensor) | float(99999) %}
+            {{ lux < ambient_threshold }}
 
 actions:
   - alias: "Turn on the light"
