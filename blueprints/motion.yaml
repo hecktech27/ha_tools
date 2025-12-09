@@ -101,7 +101,8 @@ variables:
   ambient_sensor: !input ambient_light_sensor
   ambient_threshold: !input ambient_light_threshold
   override: !input override_switch
-  
+  motion_entities: !input motion_entity
+
 condition:
   - condition: and
     conditions:
@@ -139,7 +140,7 @@ actions:
       - trigger: template
         value_template: >
           {{ 
-            expand(!input motion_entity)
+            expand(motion motion_entities)
               | selectattr('state','eq','on')
               | list
               | count == 0
