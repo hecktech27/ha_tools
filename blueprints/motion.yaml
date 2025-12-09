@@ -139,46 +139,47 @@ actions:
           - condition: trigger
             id:
               - motion
-            sequence:
-              - alias: "Turn on the light"
-                action: light.turn_on
-                target: !input light_target
-              - alias: "Wait until there is no motion from any device and doors are closed"
-                wait_for_trigger:
-                  - trigger: template
-                    value_template: >
-                      {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                      {{ 
-                        ent | select('is_state', 'on') | list | count == 0
-                      }}
-              - alias: "Wait the number of seconds that has been set"
-                delay: !input no_motion_wait
-              - alias: "Turn off the light"
-                action: light.turn_off
-                target: !input light_target
+        sequence:
+          - alias: "Turn on the light"
+            action: light.turn_on
+            target: !input light_target
+          - alias: "Wait until there is no motion from any device and doors are closed"
+            wait_for_trigger:
+              - trigger: template
+                value_template: >
+                  {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
+                  {{ 
+                    ent | select('is_state', 'on') | list | count == 0
+                  }}
+          - alias: "Wait the number of seconds that has been set"
+            delay: !input no_motion_wait
+          - alias: "Turn off the light"
+            action: light.turn_off
+            target: !input light_target
+      - conditions:
           - condition: trigger
             id:
               - onchange
               - onchange2
-            sequence:
-              - alias: "Turn on the light"
-                action: light.turn_on
-                target: !input light_target
-              - alias: "Wait if any motion sensor is active"
-                choose:
-                  - conditions:
-                      - condition: template
+        sequence:
+          - alias: "Turn on the light"
+            action: light.turn_on
+            target: !input light_target
+          - alias: "Wait if any motion sensor is active"
+            choose:
+              - conditions:
+                  - condition: template
+                    value_template: >
+                      {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
+                      {{ (ent | select('is_state', 'on') | list | count) > 0 }}
+                sequence:
+                  - wait_for_trigger:
+                      - trigger: template
                         value_template: >
                           {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                          {{ (ent | select('is_state', 'on') | list | count) > 0 }}
-                        sequence:
-                          - wait_for_trigger:
-                              - trigger: template
-                                value_template: >
-                                  {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                                  {{ (ent | select('is_state', 'on') | list | count) == 0 }}
-              - alias: "Wait the number of seconds that has been set"
-                delay: !input no_motion_wait
-              - alias: "Turn off the light"
-                action: light.turn_off
-                target: !input light_target
+                          {{ (ent | select('is_state', 'on') | list | count) == 0 }}
+          - alias: "Wait the number of seconds that has been set"
+            delay: !input no_motion_wait
+          - alias: "Turn off the light"
+            action: light.turn_off
+            target: !input light_target
