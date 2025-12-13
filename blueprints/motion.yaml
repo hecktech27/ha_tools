@@ -81,8 +81,6 @@ blueprint:
             - domain: input_boolean
             - domain: switch
 
-# If motion is detected within the delay,
-# we restart the script.
 mode: restart
 max_exceeded: silent
 
@@ -102,12 +100,6 @@ triggers:
     from: "on"
     to: "off"
     id: "onchange2"
-#  - trigger: state
-#    entity_id: !input override_switch
-#    from: "off"
-#    to: "on"
-#    id: "override"
-    
 
 variables:
   ambient_sensor: !input ambient_light_sensor
@@ -119,28 +111,14 @@ variables:
 condition:
   - condition: and
     conditions:
-    - condition: or
-      conditions:
-        - condition: template
-          value_template: >
-            {{ override == 'none' }}
-        - condition: template
-          value_template: >
-            {{ is_state(override, 'off') }}
-#    - condition: or
-#      conditions:
-#        # Either no sensor defined
-#        - condition: template
-#          value_template: "{{ ambient_sensor == 'none' }}"
-#        # Or sensor state is unknown/unavailable
-#        - condition: template
-#          value_template: >
-#            {{ states(ambient_sensor) in ['unknown', 'unavailable'] }}
-#        # Or sensor value below threshold
-#        - condition: template
-#          value_template: >
-#            {% set lux = states(ambient_sensor) | float(99999) %}
-#            {{ lux < ambient_threshold }}
+      - condition: or
+        conditions:
+          - condition: template
+            value_template: >
+              {{ override == 'none' }}
+          - condition: template
+            value_template: >
+              {{ is_state(override, 'off') }}
 
 actions:
   - choose:
@@ -158,17 +136,13 @@ actions:
                         entity_id: !input light_target
                         state:
                           - "off"
-                      # check brightness
                       - condition: or
                         conditions:
-                          # Either no sensor defined
                           - condition: template
                             value_template: "{{ ambient_sensor == 'none' }}"
-                          # Or sensor state is unknown/unavailable
                           - condition: template
                             value_template: >
                               {{ states(ambient_sensor) in ['unknown', 'unavailable'] }}
-                          # Or sensor value below threshold
                           - condition: template
                             value_template: >
                               {% set lux = states(ambient_sensor) | float(99999) %}
@@ -182,14 +156,13 @@ actions:
                       - trigger: template
                         value_template: >
                           {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                          {{ 
-                            ent | select('is_state', 'on') | list | count == 0
-                          }}
+                          {{ ent | select('is_state', 'on') | list | count == 0 }}
                   - alias: "Wait the number of seconds that has been set"
                     delay: !input no_motion_wait
                   - alias: "Turn off the light"
                     action: light.turn_off
                     target: !input light_target
+
               # motion trigger when previously on
               - conditions:
                   - condition: and
@@ -207,14 +180,13 @@ actions:
                       - trigger: template
                         value_template: >
                           {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                          {{ 
-                            ent | select('is_state', 'on') | list | count == 0
-                          }}
+                          {{ ent | select('is_state', 'on') | list | count == 0 }}
                   - alias: "Wait the number of seconds that has been set"
                     delay: !input no_motion_wait
                   - alias: "Turn off the light"
                     action: light.turn_off
                     target: !input light_target
+
               # motion trigger when previously off and brightness over threshold
               - conditions:
                   - condition: and
@@ -225,14 +197,11 @@ actions:
                           - "off"
                       - condition: or
                         conditions:
-                          # Either no sensor defined
                           - condition: template
                             value_template: "{{ ambient_sensor == 'none' }}"
-                          # Or sensor state is unknown/unavailable
                           - condition: template
                             value_template: >
                               {{ states(ambient_sensor) in ['unknown', 'unavailable'] }}
-                          # Or sensor value below threshold
                           - condition: template
                             value_template: >
                               {% set lux = states(ambient_sensor) | float(99999) %}
@@ -246,14 +215,13 @@ actions:
                       - trigger: template
                         value_template: >
                           {% set ent = motion_entities if motion_entities is iterable else [motion_entities] %}
-                          {{ 
-                            ent | select('is_state', 'on') | list | count == 0
-                          }}
+                          {{ ent | select('is_state', 'on') | list | count == 0 }}
                   - alias: "Wait the number of seconds that has been set"
                     delay: !input no_motion_wait
                   - alias: "Turn off the light"
                     action: light.turn_off
                     target: !input light_target
+
       - conditions:
           - condition: trigger
             id:
