@@ -204,7 +204,7 @@ actions:
                         value_template: >
                           {% set lights = expand(light_targets)| selectattr('domain', 'eq', 'light') | list %}
                           {{
-                            lights | selectattr('state', 'eq', 'on') | list | count == 0
+                            lights | selectattr('state', 'eq', 'on') | list | count > 0
                           }}
                 sequence:
                   - alias: "Turn on the light"
