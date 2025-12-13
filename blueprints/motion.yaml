@@ -150,7 +150,6 @@ actions:
               - motion
         sequence:
           - choose:
-                sequence:
               # motion trigger when previously off
               - conditions:
                   - condition: and
