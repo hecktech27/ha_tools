@@ -150,24 +150,15 @@ actions:
               - motion
         sequence:
           - choose:
-              # dummy
-              - conditions:
-                  - condition: template
-                    value_template: >
-                      {% set lights = expand(light_targets) %}
-                      {% set lights = lights | selectattr('domain','eq','light') | rejectattr('state','in',['unknown','unavailable']) | list %}
-                      {{ lights | selectattr('state','eq','on') | list | count > 0 }}
                 sequence:
               # motion trigger when previously off
               - conditions:
                   - condition: and
                     conditions:
-                      - condition: template
-                        value_template: >
-                          {% set lights = expand(light_targets)| selectattr('domain', 'eq', 'light') | list %}
-                          {{
-                            lights | selectattr('state', 'eq', 'on') | list | count == 0
-                          }}
+                      - condition: state
+                        entity_id: !input light_target
+                        state:
+                          - "off"
                       # check brightness
                       - condition: or
                         conditions:
@@ -204,23 +195,10 @@ actions:
               - conditions:
                   - condition: and
                     conditions:
-#                      - condition: state
-#                        entity_id: !input light_target
-#                        state:
-#                          - "on"
-                        - condition: template
-                          value_template: >
-                            {% set lights = expand(light_targets)
-                                | selectattr('domain', 'eq', 'light')
-                                | rejectattr('state', 'in', ['unknown', 'unavailable'])
-                                | list %}
-                            {{ lights | selectattr('state', 'eq', 'on') | list | count > 0 }}
-#                      - condition: template
-#                        value_template: >
-#                          {% set lights = expand(light_targets)| selectattr('domain', 'eq', 'light') | list %}
-#                          {{
-#                            lights | selectattr('state', 'eq', 'on') | list | count > 0
-#                          }}
+                      - condition: state
+                        entity_id: !input light_target
+                        state:
+                          - "on"
                 sequence:
                   - alias: "Turn on the light"
                     action: light.turn_on
@@ -242,12 +220,10 @@ actions:
               - conditions:
                   - condition: and
                     conditions:
-                      - condition: template
-                        value_template: >
-                          {% set lights = expand(light_targets)| selectattr('domain', 'eq', 'light') | list %}
-                          {{
-                            lights | selectattr('state', 'eq', 'on') | list | count == 0
-                          }}
+                      - condition: state
+                        entity_id: !input light_target
+                        state:
+                          - "off"
                       - condition: or
                         conditions:
                           # Either no sensor defined
