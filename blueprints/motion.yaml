@@ -22,22 +22,30 @@ blueprint:
               domain: binary_sensor
             - device_class: power
               domain: binary_sensor
-    activate_on_change:
-      name: OnChange-Devices - optional
-      description: Select one or more motion/door sensors to trigger the lights on each state change. The automation will not wait for the sensor to turn off again but will keep the light(s) on for the defined time after a state change.
-      default: []
-      selector:
-        entity:
-          multiple: true
-          filter:
-            - device_class: occupancy
-              domain: binary_sensor
-            - device_class: motion
-              domain: binary_sensor
-            - device_class: opening
-              domain: binary_sensor
-            - device_class: power
-              domain: binary_sensor
+            - domain: input_boolean
+    opt_onchange:
+      name: "Optional: OnChange-Devices"
+      description: "Select one or more motion/door sensors to trigger the lights on each state change. The automation will not wait for the sensor to turn off again but will keep the light(s) on for the defined time after a state change."
+      collapsed: true
+      icon: mdi:alert-plus
+      input:
+        activate_on_change:
+          name: OnChange-Devices - optional
+          description: Select one or more motion/door sensors to trigger the lights on each state change. The automation will not wait for the sensor to turn off again but will keep the light(s) on for the defined time after a state change.
+          default: []
+          selector:
+            entity:
+              multiple: true
+              filter:
+                - device_class: occupancy
+                  domain: binary_sensor
+                - device_class: motion
+                  domain: binary_sensor
+                - device_class: opening
+                  domain: binary_sensor
+                - device_class: power
+                  domain: binary_sensor
+                - domain: input_boolean
     light_target:
       name: "Light(s)"
       description: "selected lights will be turned on and off by the motion sensor."
