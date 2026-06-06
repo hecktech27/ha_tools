@@ -1,7 +1,7 @@
 blueprint:
   name: Licht-Watchdog
   description: >
-    Version 1.0
+    Version 1.1
 
 
     Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
@@ -48,7 +48,7 @@ blueprint:
         action: {}
 
 variables:
-  blueprint_version: "1.0"
+  blueprint_version: "1.1"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
   timeout_total_seconds: >
@@ -73,6 +73,12 @@ condition:
 action:
   - alias: "Watchdog-Loop – Timer zurücksetzen bei Aktivität"
     repeat:
+      while:
+        - condition: template
+          value_template: >
+            {{ expand(target_lights_list)
+               | selectattr('state', 'eq', 'on')
+               | list | count > 0 }}
       sequence:
         - alias: "Warte auf Timeout oder Reset-Ereignis"
           wait_for_trigger:
@@ -86,34 +92,24 @@ action:
               to: "off"
           timeout: "{{ timeout_total_seconds }}"
           continue_on_timeout: true
-      until:
-        - condition: template
-          value_template: >
-            {{ wait.trigger == none
-               or expand(target_lights_list)
-                  | selectattr('state', 'eq', 'on')
-                  | list | count == 0 }}
 
-  - condition: template
-    value_template: >
-      {{ expand(target_lights_list)
-         | selectattr('state', 'eq', 'on')
-         | list | count > 0 }}
-
-  - variables:
-      lights_turned_off: >
-        {{ expand(target_lights_list)
-           | selectattr('state', 'eq', 'on')
-           | map(attribute='entity_id')
-           | list }}
-
-  - alias: "Alle Targets ausschalten"
-    service: light.turn_off
-    target:
-      entity_id: !input target_lights
-
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ (optional_action | default([])) | length > 0 }}"
-        sequence: !input optional_action
+        - if:
+            - condition: template
+              value_template: "{{ wait.trigger == none }}"
+          then:
+            - variables:
+                lights_turned_off: >
+                  {{ expand(target_lights_list)
+                     | selectattr('state', 'eq', 'on')
+                     | map(attribute='entity_id')
+                     | list }}
+            - alias: "Alle Targets ausschalten"
+              service: light.turn_off
+              target:
+                entity_id: !input target_lights
+            - choose:
+                - conditions:
+                    - condition: template
+                      value_template: "{{ (optional_action | default([])) | length > 0 }}"
+                  sequence: !input optional_action
+            - stop: "timeout_reached"
