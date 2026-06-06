@@ -69,12 +69,6 @@ condition:
 action:
   - alias: "Watchdog-Loop – Timer zurücksetzen bei Aktivität"
     repeat:
-      while:
-        - condition: template
-          value_template: >
-            {{ expand(target_lights_list)
-               | selectattr('state', 'eq', 'on')
-               | list | count > 0 }}
       sequence:
         - alias: "Warte auf Timeout oder Reset-Ereignis"
           wait_for_trigger:
@@ -88,17 +82,13 @@ action:
               to: "off"
           timeout: "{{ timeout_total_seconds }}"
           continue_on_timeout: true
-
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: "{{ wait.trigger == none }}"
-              sequence:
-                - stop: "timeout_reached"
-            - conditions:
-                - condition: template
-                  value_template: "{{ wait.trigger is not none }}"
-              sequence: []
+      until:
+        - condition: template
+          value_template: >
+            {{ wait.trigger == none
+               or expand(target_lights_list)
+                  | selectattr('state', 'eq', 'on')
+                  | list | count == 0 }}
 
   - condition: template
     value_template: >
