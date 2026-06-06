@@ -1,6 +1,9 @@
 blueprint:
   name: Licht-Watchdog
   description: >
+    Version 1.0
+
+
     Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
     wenn keine relevante Aktivität mehr stattfindet. Der Timeout wird bei jeder
     Statusänderung eines Triggers zurückgesetzt. Werden alle Lichter vorher manuell
@@ -45,6 +48,7 @@ blueprint:
         action: {}
 
 variables:
+  blueprint_version: "1.0"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
   timeout_total_seconds: >
