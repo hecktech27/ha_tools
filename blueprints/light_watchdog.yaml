@@ -1,0 +1,125 @@
+blueprint:
+  name: Licht-Watchdog
+  description: >
+    Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
+    wenn keine relevante Aktivität mehr stattfindet. Der Timeout wird bei jeder
+    Statusänderung eines Triggers zurückgesetzt. Werden alle Lichter vorher manuell
+    ausgeschaltet, endet die Automation ohne Aktion.
+    Kein externer Helper nötig.
+  domain: automation
+  input:
+    target_lights:
+      name: Ziel-Lichter (Targets)
+      description: Lichter, die überwacht und nach Timeout ausgeschaltet werden.
+      selector:
+        entity:
+          domain: light
+          multiple: true
+
+    trigger_entities:
+      name: Trigger-Entitäten (Sensoren)
+      description: >
+        Entitäten, deren Statusänderung den Timeout zurücksetzt (z.B. Türkontakte,
+        Bewegungsmelder). Kann leer bleiben – dann wird nur auf Licht-Änderungen reagiert.
+      default: []
+      selector:
+        entity:
+          multiple: true
+
+    timeout_duration:
+      name: Timeout
+      description: Zeit bis zum automatischen Ausschalten nach letzter Aktivität.
+      default: "00:05:00"
+      selector:
+        duration: {}
+
+    optional_action:
+      name: Optionale Aktion nach Ausschalten
+      description: >
+        Wird ausgeführt nachdem die Lichter automatisch ausgeschaltet wurden.
+        Verfügbare Variablen:
+        - {{ lights_turned_off }} – Liste der ausgeschalteten Entity-IDs
+        - {{ timeout_total_seconds }} – Konfigurierter Timeout in Sekunden
+      default: []
+      selector:
+        action: {}
+
+variables:
+  target_lights_list: !input target_lights
+  timeout_duration: !input timeout_duration
+  timeout_total_seconds: >
+    {{ (timeout_duration.hours | default(0) | int) * 3600
+       + (timeout_duration.minutes | default(0) | int) * 60
+       + (timeout_duration.seconds | default(0) | int) }}
+
+mode: restart
+
+trigger:
+  - platform: state
+    entity_id: !input target_lights
+    to: "on"
+
+condition:
+  - condition: template
+    value_template: >
+      {{ expand(target_lights_list)
+         | selectattr('state', 'eq', 'on')
+         | list | count > 0 }}
+
+action:
+  - alias: "Watchdog-Loop – Timer zurücksetzen bei Aktivität"
+    repeat:
+      while:
+        - condition: template
+          value_template: >
+            {{ expand(target_lights_list)
+               | selectattr('state', 'eq', 'on')
+               | list | count > 0 }}
+      sequence:
+        - alias: "Warte auf Timeout oder Reset-Ereignis"
+          wait_for_trigger:
+            - platform: state
+              entity_id: !input target_lights
+              to: "on"
+            - platform: state
+              entity_id: !input trigger_entities
+            - platform: state
+              entity_id: !input target_lights
+              to: "off"
+          timeout: "{{ timeout_total_seconds }}"
+          continue_on_timeout: true
+
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: "{{ wait.trigger == none }}"
+              sequence:
+                - stop: "timeout_reached"
+            - conditions:
+                - condition: template
+                  value_template: "{{ wait.trigger is not none }}"
+              sequence: []
+
+  - condition: template
+    value_template: >
+      {{ expand(target_lights_list)
+         | selectattr('state', 'eq', 'on')
+         | list | count > 0 }}
+
+  - variables:
+      lights_turned_off: >
+        {{ expand(target_lights_list)
+           | selectattr('state', 'eq', 'on')
+           | map(attribute='entity_id')
+           | list }}
+
+  - alias: "Alle Targets ausschalten"
+    service: light.turn_off
+    target:
+      entity_id: !input target_lights
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ (optional_action | default([])) | length > 0 }}"
+        sequence: !input optional_action
