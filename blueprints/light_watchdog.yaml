@@ -1,7 +1,7 @@
 blueprint:
   name: Licht-Watchdog
   description: >
-    Version 1.4
+    Version 1.5
 
 
     Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
@@ -29,6 +29,16 @@ blueprint:
         entity:
           multiple: true
 
+    override_entity:
+      name: Override-Entität (optional)
+      description: >
+        Wenn diese Entität den Zustand 'on' hat, wird die Automation abgebrochen
+        und die Lichter nicht ausgeschaltet. Z.B. ein input_boolean oder binary_sensor.
+        Kann leer bleiben.
+      default: []
+      selector:
+        entity: {}
+
     timeout_duration:
       name: Timeout
       description: Zeit bis zum automatischen Ausschalten nach letzter Aktivität.
@@ -51,9 +61,10 @@ blueprint:
         action: {}
 
 variables:
-  blueprint_version: "1.4"
+  blueprint_version: "1.5"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
+  override_entity: !input override_entity
 
 mode: restart
 
@@ -96,6 +107,14 @@ action:
             - condition: template
               value_template: "{{ wait.trigger == none }}"
           then:
+            # Override-Check: Abbrechen wenn Override-Entität 'on' ist
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ override_entity != []
+                       and states(override_entity) == 'on' }}
+              then:
+                - stop: "override_active"
             - variables:
                 lights_turned_off: >
                   {{ expand(target_lights_list)
