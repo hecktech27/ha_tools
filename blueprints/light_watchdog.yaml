@@ -1,7 +1,7 @@
 blueprint:
   name: Licht-Watchdog
   description: >
-    Version 1.1
+    Version 1.2
 
 
     Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
@@ -48,13 +48,9 @@ blueprint:
         action: {}
 
 variables:
-  blueprint_version: "1.1"
+  blueprint_version: "1.2"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
-  timeout_total_seconds: >
-    {{ (timeout_duration.hours | default(0) | int) * 3600
-       + (timeout_duration.minutes | default(0) | int) * 60
-       + (timeout_duration.seconds | default(0) | int) }}
 
 mode: restart
 
@@ -90,7 +86,10 @@ action:
             - platform: state
               entity_id: !input target_lights
               to: "off"
-          timeout: "{{ timeout_total_seconds }}"
+          timeout:
+            hours: "{{ timeout_duration.hours | default(0) | int }}"
+            minutes: "{{ timeout_duration.minutes | default(0) | int }}"
+            seconds: "{{ timeout_duration.seconds | default(0) | int }}"
           continue_on_timeout: true
 
         - if:
@@ -103,6 +102,10 @@ action:
                      | selectattr('state', 'eq', 'on')
                      | map(attribute='entity_id')
                      | list }}
+                timeout_total_seconds: >
+                  {{ (timeout_duration.hours | default(0) | int) * 3600
+                     + (timeout_duration.minutes | default(0) | int) * 60
+                     + (timeout_duration.seconds | default(0) | int) }}
             - alias: "Alle Targets ausschalten"
               service: light.turn_off
               target:
