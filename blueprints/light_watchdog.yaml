@@ -1,7 +1,7 @@
 blueprint:
   name: Licht-Watchdog
   description: >
-    Version 1.2
+    Version 1.3
 
 
     Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
@@ -32,7 +32,10 @@ blueprint:
     timeout_duration:
       name: Timeout
       description: Zeit bis zum automatischen Ausschalten nach letzter Aktivität.
-      default: "00:05:00"
+      default:
+        hours: 0
+        minutes: 5
+        seconds: 0
       selector:
         duration: {}
 
@@ -48,7 +51,7 @@ blueprint:
         action: {}
 
 variables:
-  blueprint_version: "1.2"
+  blueprint_version: "1.3"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
 
@@ -78,14 +81,13 @@ action:
       sequence:
         - alias: "Warte auf Timeout oder Reset-Ereignis"
           wait_for_trigger:
-            - platform: state
-              entity_id: !input target_lights
-              to: "on"
-            - platform: state
-              entity_id: !input trigger_entities
+            # Licht wird ausgeschaltet (manuell)
             - platform: state
               entity_id: !input target_lights
               to: "off"
+            # Sensor-Entität ändert Status → Timer-Reset
+            - platform: state
+              entity_id: !input trigger_entities
           timeout:
             hours: "{{ timeout_duration.hours | default(0) | int }}"
             minutes: "{{ timeout_duration.minutes | default(0) | int }}"
