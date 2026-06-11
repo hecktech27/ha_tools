@@ -7,3 +7,6 @@ Custom sentences(german) to extend the functionality included in HomeAssistant c
 
 ## Blueprints
 Useful Blueprints to easily create automations can be found [here](./blueprints/)
+
+## Templates
+Useful templates can be found [here](./templates)
