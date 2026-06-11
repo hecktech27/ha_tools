@@ -1,47 +1,48 @@
 blueprint:
-  name: Licht-Watchdog
+  name: Light Watchdog
   description: >
-    Version 1.5
+    Version 1.6
 
 
-    Schaltet definierte Lichter nach einem konfigurierbaren Timeout automatisch aus,
-    wenn keine relevante Aktivität mehr stattfindet. Der Timeout wird bei jeder
-    Statusänderung eines Triggers zurückgesetzt. Werden alle Lichter vorher manuell
-    ausgeschaltet, endet die Automation ohne Aktion.
-    Kein externer Helper nötig.
+    Automatically turns off defined lights after a configurable timeout when no
+    relevant activity is detected. The timeout resets on every state change of a
+    trigger entity. If all lights are manually turned off beforehand, the automation
+    ends without taking any action.
+    No external helper required.
   domain: automation
   input:
     target_lights:
-      name: Ziel-Lichter (Targets)
-      description: Lichter, die überwacht und nach Timeout ausgeschaltet werden.
+      name: Target Lights
+      description: Lights to be monitored and turned off after the timeout.
       selector:
         entity:
           domain: light
           multiple: true
 
     trigger_entities:
-      name: Trigger-Entitäten (Sensoren)
+      name: Trigger Entities (Sensors)
       description: >
-        Entitäten, deren Statusänderung den Timeout zurücksetzt (z.B. Türkontakte,
-        Bewegungsmelder). Kann leer bleiben – dann wird nur auf Licht-Änderungen reagiert.
+        Entities whose state changes reset the timeout (e.g. door contacts,
+        motion sensors). Can be left empty – the automation will then only react
+        to light state changes.
       default: []
       selector:
         entity:
           multiple: true
 
     override_entity:
-      name: Override-Entität (optional)
+      name: Override Entity (optional)
       description: >
-        Wenn diese Entität den Zustand 'on' hat, wird die Automation abgebrochen
-        und die Lichter nicht ausgeschaltet. Z.B. ein input_boolean oder binary_sensor.
-        Kann leer bleiben.
+        If this entity is in the 'on' state, the automation will be aborted and
+        the lights will not be turned off. E.g. an input_boolean or binary_sensor.
+        Can be left empty.
       default: []
       selector:
         entity: {}
 
     timeout_duration:
       name: Timeout
-      description: Zeit bis zum automatischen Ausschalten nach letzter Aktivität.
+      description: Time until automatic shut-off after the last detected activity.
       default:
         hours: 0
         minutes: 5
@@ -50,18 +51,18 @@ blueprint:
         duration: {}
 
     optional_action:
-      name: Optionale Aktion nach Ausschalten
+      name: Optional Action After Turning Off
       description: >
-        Wird ausgeführt nachdem die Lichter automatisch ausgeschaltet wurden.
-        Verfügbare Variablen:
-        - {{ lights_turned_off }} – Liste der ausgeschalteten Entity-IDs
-        - {{ timeout_total_seconds }} – Konfigurierter Timeout in Sekunden
+        Executed after the lights have been automatically turned off.
+        Available variables:
+        - {{ lights_turned_off }} – List of entity IDs that were turned off
+        - {{ timeout_total_seconds }} – Configured timeout in seconds
       default: []
       selector:
         action: {}
 
 variables:
-  blueprint_version: "1.5"
+  blueprint_version: "1.6"
   target_lights_list: !input target_lights
   timeout_duration: !input timeout_duration
   override_entity: !input override_entity
@@ -81,7 +82,7 @@ condition:
          | list | count > 0 }}
 
 action:
-  - alias: "Watchdog-Loop – Timer zurücksetzen bei Aktivität"
+  - alias: "Watchdog loop – reset timer on activity"
     repeat:
       while:
         - condition: template
@@ -90,7 +91,7 @@ action:
                | selectattr('state', 'eq', 'on')
                | list | count > 0 }}
       sequence:
-        - alias: "Warte auf Timeout oder Reset-Ereignis"
+        - alias: "Wait for timeout or reset event"
           wait_for_trigger:
             - platform: state
               entity_id: !input target_lights
@@ -107,7 +108,7 @@ action:
             - condition: template
               value_template: "{{ wait.trigger == none }}"
           then:
-            # Override-Check: Abbrechen wenn Override-Entität 'on' ist
+            # Override check: abort if the override entity is 'on'
             - if:
                 - condition: template
                   value_template: >
@@ -125,10 +126,10 @@ action:
                   {{ (timeout_duration.hours | default(0) | int) * 3600
                      + (timeout_duration.minutes | default(0) | int) * 60
                      + (timeout_duration.seconds | default(0) | int) }}
-            - alias: "Alle Targets ausschalten"
+            - alias: "Turn off all targets"
               service: light.turn_off
               target:
                 entity_id: !input target_lights
-            - alias: "Optionale Aktion"
+            - alias: "Optional action"
               sequence: !input optional_action
             - stop: "timeout_reached"
