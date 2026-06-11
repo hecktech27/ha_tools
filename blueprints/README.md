@@ -19,5 +19,6 @@ Import **development** version:
 
 ## Light Watchdog
 No matter who or what turned on your lights - this blueprint makes sure your lights turn off again after a specified timespan. you can define timeout-reset-entities like motion sensors or door contacts, light switches,... to reset the timeout. You can specify an override entity that - if state=on - makes sure your lights stay turned on.
+For debugging and automation improvement purposes an optional action call at the end can be used e.g. to send a notification that the automation has triggered a light turn off and notify you of which lights have been turned off by the automation.
 
 [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fhecktech27%2Fha_tools%2Fblob%2Fmain%2Fblueprints%2Flight_watchdog.yaml)
